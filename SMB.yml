@@ -5,6 +5,7 @@ pool:
 
 variables:
   -group: "Test Var Group"
+  Location: "canadacentral"
   ServiceConnectionName: "spBicep"
   RunNumber: $(Build.BuildNumber)
 
