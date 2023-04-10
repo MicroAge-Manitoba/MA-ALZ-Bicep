@@ -107,7 +107,7 @@ param parHubRouteTableName string = '${parCompanyPrefix}-hub-routetable'
 param parDisableBgpRoutePropagation bool = false
 
 @sys.description('Switch to enable/disable Private DNS Zones deployment.')
-param parPrivateDnsZonesEnabled bool = true
+param parPrivateDnsZonesEnabled bool = false
 
 @sys.description('Resource Group Name for Private DNS Zones.')
 param parPrivateDnsZonesResourceGroup string = resourceGroup().name
@@ -188,22 +188,6 @@ param parPrivateDnsZones array = [
   "value": {}
 }''')
 param parVpnGatewayConfig object = {
-  name: '${parCompanyPrefix}-Vpn-Gateway'
-  gatewayType: 'Vpn'
-  sku: 'basic'
-  vpnType: 'RouteBased'
-  generation: 'Generation1'
-  enableBgp: false
-  activeActive: false
-  enableBgpRouteTranslationForNat: false
-  enableDnsForwarding: false
-  asn: 65515
-  bgpPeeringAddress: ''
-  bgpsettings: {
-    asn: 65515
-    bgpPeeringAddress: ''
-    peerWeight: 5
-  }
 }
 
 @sys.description('''Configuration for ExpressRoute virtual network gateway to be deployed. If a ExpressRoute virtual network gateway is not desired an empty object should be used as the input parameter in the parameter file, i.e.
