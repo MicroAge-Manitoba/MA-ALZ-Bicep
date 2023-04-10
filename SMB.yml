@@ -6,16 +6,6 @@ pool:
 variables:
   -group: "Test Var Group"
   ServiceConnectionName: "spBicep"
-  ManagementGroupPrefix: "$env:mgmtPrefix"
-  TopLevelManagementGroupDisplayName: "$env:mgmtGroupName"
-  Location: "canadacentral"
-  LoggingSubId: "$env:loggingSubId"
-  LoggingResourceGroupName: "$env:loggingRGName"
-  HubNetworkSubId: "$env:hubNetworkSubId"
-  HubNetworkResourceGroupName: "$env:hubNetworkRGName"
-  RoleAssignmentManagementGroupId: "$env:roleAssignmentMgmtGroupName"
-  SpokeNetworkSubId: "$env:spokeNetworkSubId"
-  SpokeNetworkResourceGroupName: "$env:spokeNetworkRGName"
   RunNumber: $(Build.BuildNumber)
 
 jobs:
@@ -32,7 +22,7 @@ jobs:
       inlineScript: |
         az deployment tenant create \
         --template-file infra-as-code/bicep/modules/managementGroups/managementGroups.bicep \
-        --parameters parTopLevelManagementGroupPrefix=$(ManagementGroupPrefix) parTopLevelManagementGroupDisplayName="$(TopLevelManagementGroupDisplayName)" \
+        --parameters parTopLevelmgmtPrefix=$(mgmtPrefix) parmgmtGroupName="$(mgmtGroupName)" \
         --location $(Location) \
         --name create_mgs-$(RunNumber)
 
@@ -48,7 +38,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/policy/definitions/customPolicyDefinitions.bicep  \
         --parameters @infra-as-code/bicep/modules/policy/definitions/parameters/customPolicyDefinitions.parameters.all.json \
         --location $(Location) \
-        --management-group-id $(ManagementGroupPrefix) \
+        --management-group-id $(mgmtPrefix) \
         --name create_policy_defs-$(RunNumber)
 
   - task: AzureCLI@2
@@ -63,7 +53,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/customRoleDefinitions/customRoleDefinitions.bicep \
         --parameters @infra-as-code/bicep/modules/customRoleDefinitions/parameters/customRoleDefinitions.parameters.all.json \
         --location $(Location) \
-        --management-group-id $(ManagementGroupPrefix) \
+        --management-group-id $(mgmtPrefix) \
         --name create_rbac_roles-$(RunNumber)
 
   - task: AzureCLI@2
@@ -74,10 +64,10 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $(LoggingSubId)
+        az account set --subscription $(loggingSubId)
         az deployment sub create \
         --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
-        --parameters parResourceGroupName=$(LoggingResourceGroupName) parLocation=$(Location) \
+        --parameters parResourceGroupName=$(loggingRGName) parLocation=$(Location) \
         --location $(Location) \
         --name create_logging_rg-$(RunNumber)
 
@@ -89,9 +79,9 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $(LoggingSubId)
+        az account set --subscription $(loggingSubId)
         az deployment group create \
-        --resource-group $(LoggingResourceGroupName) \
+        --resource-group $(loggingRGName) \
         --template-file infra-as-code/bicep/modules/logging/logging.bicep \
         --parameters @infra-as-code/bicep/modules/logging/parameters/logging.parameters.all.json \
         --name create_logging-$(RunNumber)
@@ -104,10 +94,10 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $(HubNetworkSubId)
+        az account set --subscription $(hubNetworkSubId)
         az deployment sub create \
         --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
-        --parameters parResourceGroupName=$(HubNetworkResourceGroupName) parLocation=$(Location) \
+        --parameters parResourceGroupName=$(hubNetworkRGName) parLocation=$(Location) \
         --location $(Location) \
         --name create_hub_network_rg-$(RunNumber)
 
@@ -119,9 +109,9 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $(HubNetworkSubId)
+        az account set --subscription $(hubNetworkSubId)
         az deployment group create \
-        --resource-group $(HubNetworkResourceGroupName) \
+        --resource-group $(hubNetworkRGName) \
         --template-file infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep \
         --parameters @infra-as-code/bicep/modules/hubNetworking/parameters/hubNetworking.parameters.all.json \
         --name create_hub_network-$(RunNumber)
@@ -138,7 +128,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/roleAssignments/roleAssignmentManagementGroupMany.bicep \
         --parameters @infra-as-code/bicep/modules/roleAssignments/parameters/roleAssignmentManagementGroupMany.securityGroup.parameters.all.json \
         --location $(Location) \
-        --management-group-id $(RoleAssignmentManagementGroupId) \
+        --management-group-id $(roleAssignmentMgmtGroupName) \
         --name create_role_assignment-$(RunNumber)
 
   - task: AzureCLI@2
@@ -153,7 +143,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/subscriptionPlacement/subscriptionPlacement.bicep \
         --parameters @infra-as-code/bicep/modules/subscriptionPlacement/parameters/subscriptionPlacement.parameters.all.json \
         --location $(Location) \
-        --management-group-id $(ManagementGroupPrefix) \
+        --management-group-id $(mgmtPrefix) \
         --name create_subscription_placement-$(RunNumber)
 
   - task: AzureCLI@2
@@ -168,7 +158,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/policy/assignments/alzDefaults/alzDefaultPolicyAssignments.bicep \
         --parameters @infra-as-code/bicep/modules/policy/assignments/alzDefaults/parameters/alzDefaultPolicyAssignments.parameters.all.json \
         --location $(Location) \
-        --management-group-id $(ManagementGroupPrefix) \
+        --management-group-id $(mgmtPrefix) \
         --name create_policy_assignments-$(RunNumber)
 
   - task: AzureCLI@2
@@ -179,10 +169,10 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $(SpokeNetworkSubId)
+        az account set --subscription $(spokeNetworkSubId)
         az deployment sub create \
         --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
-        --parameters parResourceGroupName=$(SpokeNetworkResourceGroupName) parLocation=$(Location) \
+        --parameters parResourceGroupName=$(spokeNetworkRGName) parLocation=$(Location) \
         --location $(Location) \
         --name create_spoke_network_rg-$(RunNumber)
 
@@ -194,9 +184,9 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $(SpokeNetworkSubId)
+        az account set --subscription $(spokeNetworkSubId)
         az deployment group create \
-        --resource-group $(SpokeNetworkResourceGroupName) \
+        --resource-group $(spokeNetworkRGName) \
         --template-file infra-as-code/bicep/modules/spokeNetworking/spokeNetworking.bicep \
         --parameters @infra-as-code/bicep/modules/spokeNetworking/parameters/spokeNetworking.parameters.all.json \
         --name create_spoke_network-$(RunNumber)
