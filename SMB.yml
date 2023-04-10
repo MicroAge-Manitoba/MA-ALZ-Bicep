@@ -78,7 +78,7 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $emv:loggingSubId
+        az account set --subscription $(LOGGING_SUB_ID)
         az deployment group create \
         --resource-group $(LOGGING_RG) \
         --template-file infra-as-code/bicep/modules/logging/logging.bicep \
@@ -139,7 +139,7 @@ jobs:
       scriptLocation: 'inlineScript'
       inlineScript: |
         az deployment mg create \
-        --template-file infra-as-code/bicep/orchestration/subPlacementAll/subscriptionPlacementAll.bicep \
+        --template-file infra-as-code/bicep/orchestration/subPlacementAll/subPlacementAll.bicep \
         --parameters parTopLevelManagementGroupPrefix $(MGMT_PREFIX) parPlatformManagementMgSubs="[$(MGMT_SUB_ID)]" parPlatformConnectivityMgSubs="[$(CONNECTIVITY_SUB_ID)]" parPlatformIdentityMgSubs="[$(IDENTITY_SUB_ID)]" parLandingZonesCorpMgSubs="[$(CORP_SUB_ID)] parLandingZonesOnlineMgSubs=[$(ONLINE_SUB_ID)]" \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
