@@ -12,7 +12,6 @@ variables:
 jobs:
 - job:
   steps:
-
   - task: AzureCLI@2
     displayName: Az CLI Deploy Management Groups
     name: create_mgs
@@ -23,7 +22,7 @@ jobs:
       inlineScript: |
         az deployment tenant create \
         --template-file infra-as-code/bicep/modules/managementGroups/managementGroups.bicep \
-        --parameters parTopLevelManagementGroupPrefix=$mgmtPrefix parTopLevelManagementGroupDisplayName="$mgmtGroupName" \
+        --parameters parTopLevelManagementGroupPrefix="$mgmtPrefix" parTopLevelManagementGroupDisplayName="$mgmtGroupName" \
         --location $(Location) \
         --name create_mgs-$(RunNumber)
 
