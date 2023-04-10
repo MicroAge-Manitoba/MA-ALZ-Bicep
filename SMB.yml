@@ -4,6 +4,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
+  -group: "Test Var Group"
   ServiceConnectionName: "SPiurALZ"
   ManagementGroupPrefix: "$env:mgmtPrefix"
   TopLevelManagementGroupDisplayName: "$env:mgmtGroupName"
