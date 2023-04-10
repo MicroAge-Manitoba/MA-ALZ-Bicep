@@ -35,7 +35,7 @@ jobs:
       inlineScript: |
         az deployment mg create \
         --template-file infra-as-code/bicep/modules/policy/definitions/customPolicyDefinitions.bicep  \
-        --parameters @infra-as-code/bicep/modules/policy/definitions/parameters/customPolicyDefinitions.parameters.all.json \
+        --parameters parTargetManagementGroupId="$(MGMT_PREFIX)" \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_policy_defs-$(RunNumber)
