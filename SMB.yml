@@ -23,7 +23,7 @@ jobs:
       inlineScript: |
         az deployment tenant create \
         --template-file infra-as-code/bicep/modules/managementGroups/managementGroups.bicep \
-        --parameters parTopLevelmgmtPrefix=$env:mgmtPrefix parmgmtGroupName="$env:mgmtGroupName" \
+        --parameters parTopLevelManagementGroupPrefix=$env:mgmtPrefix parTopLevelManagementGroupDisplayName="$env:mgmtGroupName" \
         --location $(Location) \
         --name create_mgs-$(RunNumber)
 
