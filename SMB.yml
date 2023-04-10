@@ -23,7 +23,7 @@ jobs:
       inlineScript: |
         az deployment tenant create \
         --template-file infra-as-code/bicep/modules/managementGroups/managementGroups.bicep \
-        --parameters parTopLevelManagementGroupPrefix=$env:mgmtPrefix parTopLevelManagementGroupDisplayName="$env:mgmtGroupName" \
+        --parameters parTopLevelManagementGroupPrefix=$(mgmtPrefix) parTopLevelManagementGroupDisplayName="$(mgmtGroupName)" \
         --location $(Location) \
         --name create_mgs-$(RunNumber)
 
@@ -39,7 +39,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/policy/definitions/customPolicyDefinitions.bicep  \
         --parameters @infra-as-code/bicep/modules/policy/definitions/parameters/customPolicyDefinitions.parameters.all.json \
         --location $(Location) \
-        --management-group-id $env:mgmtPrefix \
+        --management-group-id $(mgmtPrefix) \
         --name create_policy_defs-$(RunNumber)
 
   - task: AzureCLI@2
@@ -54,7 +54,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/customRoleDefinitions/customRoleDefinitions.bicep \
         --parameters @infra-as-code/bicep/modules/customRoleDefinitions/parameters/customRoleDefinitions.parameters.all.json \
         --location $(Location) \
-        --management-group-id $env:mgmtPrefix \
+        --management-group-id $(mgmtPrefix) \
         --name create_rbac_roles-$(RunNumber)
 
   - task: AzureCLI@2
@@ -65,10 +65,10 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $env:loggingSubId
+        az account set --subscription $(loggingSubId)
         az deployment sub create \
         --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
-        --parameters parResourceGroupName=$env:loggingRGName parLocation=$(Location) \
+        --parameters parResourceGroupName=$(loggingRGName) parLocation=$(Location) \
         --location $(Location) \
         --name create_logging_rg-$(RunNumber)
 
@@ -82,7 +82,7 @@ jobs:
       inlineScript: |
         az account set --subscription $emv:loggingSubId
         az deployment group create \
-        --resource-group $env:loggingRGName \
+        --resource-group $(loggingRGName) \
         --template-file infra-as-code/bicep/modules/logging/logging.bicep \
         --parameters @infra-as-code/bicep/modules/logging/parameters/logging.parameters.all.json \
         --name create_logging-$(RunNumber)
@@ -95,10 +95,10 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $env:hubNetworkSubId
+        az account set --subscription $(hubNetworkSubId)
         az deployment sub create \
         --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
-        --parameters parResourceGroupName=$env:hubNetworkRGName parLocation=$(Location) \
+        --parameters parResourceGroupName=$(hubNetworkRGName) parLocation=$(Location) \
         --location $(Location) \
         --name create_hub_network_rg-$(RunNumber)
 
@@ -110,9 +110,9 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $env:hubNetworkSubId
+        az account set --subscription $(hubNetworkSubId)
         az deployment group create \
-        --resource-group $env:hubNetworkRGName \
+        --resource-group $(hubNetworkRGName) \
         --template-file infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep \
         --parameters @infra-as-code/bicep/modules/hubNetworking/parameters/hubNetworking.parameters.all.json \
         --name create_hub_network-$(RunNumber)
@@ -129,7 +129,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/roleAssignments/roleAssignmentManagementGroupMany.bicep \
         --parameters @infra-as-code/bicep/modules/roleAssignments/parameters/roleAssignmentManagementGroupMany.securityGroup.parameters.all.json \
         --location $(Location) \
-        --management-group-id $env:roleAssignmentMgmtGroupName \
+        --management-group-id $(roleAssignmentMgmtGroupName) \
         --name create_role_assignment-$(RunNumber)
 
   - task: AzureCLI@2
@@ -144,7 +144,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/subscriptionPlacement/subscriptionPlacement.bicep \
         --parameters @infra-as-code/bicep/modules/subscriptionPlacement/parameters/subscriptionPlacement.parameters.all.json \
         --location $(Location) \
-        --management-group-id $env:mgmtPrefix \
+        --management-group-id $(mgmtPrefix) \
         --name create_subscription_placement-$(RunNumber)
 
   - task: AzureCLI@2
@@ -159,7 +159,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/policy/assignments/alzDefaults/alzDefaultPolicyAssignments.bicep \
         --parameters @infra-as-code/bicep/modules/policy/assignments/alzDefaults/parameters/alzDefaultPolicyAssignments.parameters.all.json \
         --location $(Location) \
-        --management-group-id $env:mgmtPrefix \
+        --management-group-id $(mgmtPrefix) \
         --name create_policy_assignments-$(RunNumber)
 
   - task: AzureCLI@2
@@ -170,10 +170,10 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $env:spokeNetworkSubId
+        az account set --subscription $(spokeNetworkSubId)
         az deployment sub create \
         --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
-        --parameters parResourceGroupName=$env:spokeNetworkRGName parLocation=$(Location) \
+        --parameters parResourceGroupName=$(spokeNetworkRGName) parLocation=$(Location) \
         --location $(Location) \
         --name create_spoke_network_rg-$(RunNumber)
 
@@ -185,9 +185,9 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $env:spokeNetworkSubId
+        az account set --subscription $(spokeNetworkSubId)
         az deployment group create \
-        --resource-group $env:spokeNetworkRGName \
+        --resource-group $(spokeNetworkRGName) \
         --template-file infra-as-code/bicep/modules/spokeNetworking/spokeNetworking.bicep \
         --parameters @infra-as-code/bicep/modules/spokeNetworking/parameters/spokeNetworking.parameters.all.json \
         --name create_spoke_network-$(RunNumber)
