@@ -5,7 +5,7 @@ pool:
 
 variables:
   -group: "Test Var Group"
-  ServiceConnectionName: "SPiurALZ"
+  ServiceConnectionName: "spBicep"
   ManagementGroupPrefix: "$env:mgmtPrefix"
   TopLevelManagementGroupDisplayName: "$env:mgmtGroupName"
   Location: "canadacentral"
