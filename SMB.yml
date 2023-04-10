@@ -50,7 +50,7 @@ jobs:
       inlineScript: |
         az deployment mg create \
         --template-file infra-as-code/bicep/modules/customRoleDefinitions/customRoleDefinitions.bicep \
-        --parameters @infra-as-code/bicep/modules/customRoleDefinitions/parameters/customRoleDefinitions.parameters.all.json \
+        --parameters parAssignableScopeManagementGroupId="$(MGMT_PREFIX)" \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_rbac_roles-$(RunNumber)
@@ -82,7 +82,7 @@ jobs:
         az deployment group create \
         --resource-group $(LOGGING_RG) \
         --template-file infra-as-code/bicep/modules/logging/logging.bicep \
-        --parameters @infra-as-code/bicep/modules/logging/parameters/logging.parameters.all.json \
+        --parameters parLogAnalyticsWorkspaceName="$(MGMT_PREFIX)-log-analytics" \
         --name create_logging-$(RunNumber)
 
   - task: AzureCLI@2
@@ -112,7 +112,7 @@ jobs:
         az deployment group create \
         --resource-group $(HUB_NETWORK_RG) \
         --template-file infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep \
-        --parameters @infra-as-code/bicep/modules/hubNetworking/parameters/hubNetworking.parameters.all.json \
+        --parameters parCompanyPrefix=$(MGMT_PREFIX) parAzBastionEnabled=$(BASTION_ENABLED) parDdosEnabled=$(DDOS_ENABLED) parAzFirewallEnabled=$(FIREWALL_ENABLED) \
         --name create_hub_network-$(RunNumber)
 
   - task: AzureCLI@2
@@ -124,14 +124,14 @@ jobs:
       scriptLocation: 'inlineScript'
       inlineScript: |
         az deployment mg create \
-        --template-file infra-as-code/bicep/modules/roleAssignments/roleAssignmentManagementGroupMany.bicep \
-        --parameters @infra-as-code/bicep/modules/roleAssignments/parameters/roleAssignmentManagementGroupMany.securityGroup.parameters.all.json \
+        --template-file infra-as-code/bicep/modules/roleAssignments/roleAssignmentManagementGroup.bicep \
+        --parameters parRoleDefinitionId="8e3af657-a8ff-443c-a75c-2fe8c4bcb635" \
         --location $(Location) \
         --management-group-id $(ROLE_ASSIGNMENT_MGMT_GROUP_NAME) \
         --name create_role_assignment-$(RunNumber)
 
   - task: AzureCLI@2
-    displayName: Az CLI Deploy Subscription Placement
+    displayName: Az CLI Deploy Subscription Placements
     name: create_subscription_placement
     inputs:
       azureSubscription: $(ServiceConnectionName)
@@ -139,8 +139,8 @@ jobs:
       scriptLocation: 'inlineScript'
       inlineScript: |
         az deployment mg create \
-        --template-file infra-as-code/bicep/modules/subscriptionPlacement/subscriptionPlacement.bicep \
-        --parameters @infra-as-code/bicep/modules/subscriptionPlacement/parameters/subscriptionPlacement.parameters.all.json \
+        --template-file infra-as-code/bicep/orchestration/subPlacementAll/subscriptionPlacementAll.bicep \
+        --parameters parTopLevelManagementGroupPrefix $(MGMT_PREFIX) parPlatformManagementMgSubs="[$(MGMT_SUB_ID)]" parPlatformConnectivityMgSubs="[$(CONNECTIVITY_SUB_ID)]" parPlatformIdentityMgSubs="[$(IDENTITY_SUB_ID)]" parLandingZonesCorpMgSubs="[$(CORP_SUB_ID)] parLandingZonesOnlineMgSubs=[$(ONLINE_SUB_ID)]" \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_subscription_placement-$(RunNumber)
@@ -155,7 +155,7 @@ jobs:
       inlineScript: |
         az deployment mg create \
         --template-file infra-as-code/bicep/modules/policy/assignments/alzDefaults/alzDefaultPolicyAssignments.bicep \
-        --parameters @infra-as-code/bicep/modules/policy/assignments/alzDefaults/parameters/alzDefaultPolicyAssignments.parameters.all.json \
+        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parLogAnalyticsWorkSpaceAndAutomationAccountLocation="canadacentral" parLogAnalyticsWorkspaceResourceId="/subscriptions/$(MGMT_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-logging/providers/Microsoft.OperationalInsights/workspaces/$(MGMT_PREFIX)-log-analytics" parAutomationAccountName="$(MGMT_PREFIX)-automation-account" parMsDefenderForCloudEmailSecurityContact="support@microagemanitoba.com" \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_policy_assignments-$(RunNumber)
@@ -187,5 +187,5 @@ jobs:
         az deployment group create \
         --resource-group $(SPOKE_NETWORK_RG) \
         --template-file infra-as-code/bicep/modules/spokeNetworking/spokeNetworking.bicep \
-        --parameters @infra-as-code/bicep/modules/spokeNetworking/parameters/spokeNetworking.parameters.all.json \
+        --parameters parSpokeNetworkName="$(MGMT_PREFIX)-AVD-VNet" \
         --name create_spoke_network-$(RunNumber)

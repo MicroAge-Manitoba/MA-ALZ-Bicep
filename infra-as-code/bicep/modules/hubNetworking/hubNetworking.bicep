@@ -190,7 +190,7 @@ param parPrivateDnsZones array = [
 param parVpnGatewayConfig object = {
   name: '${parCompanyPrefix}-Vpn-Gateway'
   gatewayType: 'Vpn'
-  sku: 'VpnGw1'
+  sku: 'basic'
   vpnType: 'RouteBased'
   generation: 'Generation1'
   enableBgp: false
@@ -211,22 +211,6 @@ param parVpnGatewayConfig object = {
   "value": {}
 }''')
 param parExpressRouteGatewayConfig object = {
-  name: '${parCompanyPrefix}-ExpressRoute-Gateway'
-  gatewayType: 'ExpressRoute'
-  sku: 'ErGw1AZ'
-  vpnType: 'RouteBased'
-  vpnGatewayGeneration: 'None'
-  enableBgp: false
-  activeActive: false
-  enableBgpRouteTranslationForNat: false
-  enableDnsForwarding: false
-  asn: '65515'
-  bgpPeeringAddress: ''
-  bgpsettings: {
-    asn: '65515'
-    bgpPeeringAddress: ''
-    peerWeight: '5'
-  }
 }
 
 @sys.description('Tags you would like to be applied to all resources in this module.')
