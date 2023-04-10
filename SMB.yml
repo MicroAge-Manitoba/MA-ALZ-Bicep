@@ -140,7 +140,7 @@ jobs:
       inlineScript: |
         az deployment mg create \
         --template-file infra-as-code/bicep/orchestration/subPlacementAll/subPlacementAll.bicep \
-        --parameters parTopLevelManagementGroupPrefix $(MGMT_PREFIX) parPlatformManagementMgSubs="[$(MGMT_SUB_ID)]" parPlatformConnectivityMgSubs="[$(CONNECTIVITY_SUB_ID)]" parPlatformIdentityMgSubs="[$(IDENTITY_SUB_ID)]" parLandingZonesCorpMgSubs="[$(CORP_SUB_ID)] parLandingZonesOnlineMgSubs=[$(ONLINE_SUB_ID)]" \
+        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parPlatformManagementMgSubs="[$(MGMT_SUB_ID)]" parPlatformConnectivityMgSubs="[$(CONNECTIVITY_SUB_ID)]" parPlatformIdentityMgSubs="[$(IDENTITY_SUB_ID)]" parLandingZonesCorpMgSubs="[$(CORP_SUB_ID)] parLandingZonesOnlineMgSubs=[$(ONLINE_SUB_ID)]" \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_subscription_placement-$(RunNumber)
@@ -161,22 +161,7 @@ jobs:
         --name create_policy_assignments-$(RunNumber)
 
   - task: AzureCLI@2
-    displayName: Az CLI Deploy Spoke Network Resource Group
-    name: create_spoke_network_rg
-    inputs:
-      azureSubscription: $(ServiceConnectionName)
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az account set --subscription $(SPOKE_NETWORK_SUB_ID)
-        az deployment sub create \
-        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
-        --parameters parResourceGroupName=$(SPOKE_NETWORK_RG) parLocation=$(Location) \
-        --location $(Location) \
-        --name create_spoke_network_rg-$(RunNumber)
-
-  - task: AzureCLI@2
-    displayName: Az CLI Deploy Spoke Network
+    displayName: Az CLI Deploy Spoke Network Peered to Hub
     name: create_spoke_network
     inputs:
       azureSubscription: $(ServiceConnectionName)
@@ -184,8 +169,8 @@ jobs:
       scriptLocation: 'inlineScript'
       inlineScript: |
         az account set --subscription $(SPOKE_NETWORK_SUB_ID)
-        az deployment group create \
-        --resource-group $(SPOKE_NETWORK_RG) \
-        --template-file infra-as-code/bicep/modules/spokeNetworking/spokeNetworking.bicep \
-        --parameters parSpokeNetworkName="$(MGMT_PREFIX)-AVD-VNet" \
+        az deployment sub create \
+        --template-file infra-as-code/bicep/orchestration/hubPeeredSpoke/hubPeeredSpoke.bicep \
+        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parResourceGroupNameForSpokeNetworking=$(MGMT_PREFIX)-AVD-Vnet-RG parSpokeNetworkName=$(MGMT_PREFIX)-AVD-Vnet parSpokeToHubRouteTableName="AVD-to-hub" parHubVirtualNetworkId="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-VNet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" \
+        --location $(Location) \
         --name create_spoke_network-$(RunNumber)
