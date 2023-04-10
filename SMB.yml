@@ -127,7 +127,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/roleAssignments/roleAssignmentManagementGroup.bicep \
         --parameters parRoleDefinitionId="8e3af657-a8ff-443c-a75c-2fe8c4bcb635" parAssigneePrincipalType="Group" parAssigneeObjectId=$(TENANT_ADMIN_OBJECT_ID) \
         --location $(Location) \
-        --management-group-id $(ROLE_ASSIGNMENT_MGMT_GROUP_NAME) \
+        --management-group-id $(MGMT_PREFIX)-platform \
         --name create_role_assignment-$(RunNumber)
 
   - task: AzureCLI@2
