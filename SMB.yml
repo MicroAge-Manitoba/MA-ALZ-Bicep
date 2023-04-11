@@ -110,7 +110,7 @@ jobs:
       inlineScript: |
         az account set --subscription $(CONNECTIVITY_SUB_ID)
         az deployment group create \
-        --resource-group "$(MGMT_PREFIX)-Vnet-RG" \
+        --resource-group "$(MGMT_PREFIX)-Hub-Vnet-RG" \
         --template-file infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep \
         --parameters parCompanyPrefix=$(MGMT_PREFIX) parAzBastionEnabled=$(BASTION_ENABLED) parDdosEnabled=$(DDOS_ENABLED) parAzFirewallEnabled=$(FIREWALL_ENABLED) \
         --name create_hub_network-$(RunNumber)
@@ -134,13 +134,14 @@ jobs:
     displayName: Az CLI Deploy Subscription Placements
     name: create_subscription_placement
     inputs:
+      secureFile: 'subPlacementAll.parameters.all.json'
       azureSubscription: $(ServiceConnectionName)
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
         az deployment mg create \
         --template-file infra-as-code/bicep/orchestration/subPlacementAll/subPlacementAll.bicep \
-        --parameters @infra-as-code/bicep/orchestration/subPlacementAll/parameters/subPlacementAll.parameters.all.json \
+        --parameters $(create_subscription_placement.secureFilePath) \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_subscription_placement-$(RunNumber)
