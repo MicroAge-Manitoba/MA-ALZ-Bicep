@@ -1,0 +1,41 @@
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  Location: "canadacentral"
+  ServiceConnectionName: "spBicep"
+  RunNumber: $(Build.BuildNumber)
+
+jobs:
+- job:
+  steps:
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Management Groups
+    name: create_mgs
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az deployment tenant create \
+        --template-file infra-as-code/bicep/modules/managementGroups/managementGroups.bicep \
+        --parameters parTopLevelManagementGroupPrefix="$(MGMT_PREFIX)" parTopLevelManagementGroupDisplayName="$(MGMT_GROUP_NAME)" \
+        --location $(Location) \
+        --name create_mgs-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Custom Policy Definitions
+    name: create_policy_defs
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az deployment mg create \
+        --template-file infra-as-code/bicep/modules/policy/definitions/customPolicyDefinitions.bicep  \
+        --parameters parTargetManagementGroupId="$(MGMT_PREFIX)" \
+        --location $(Location) \
+        --management-group-id $(MGMT_PREFIX) \
+        --name create_policy_defs-$(RunNumber)
