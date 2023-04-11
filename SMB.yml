@@ -93,7 +93,7 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $(HUB_NETWORK_SUB_ID)
+        az account set --subscription $(CONNECTIVITY_SUB_ID)
         az deployment sub create \
         --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
         --parameters parResourceGroupName=$(HUB_NETWORK_RG) parLocation=$(Location) \
@@ -108,7 +108,7 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $(HUB_NETWORK_SUB_ID)
+        az account set --subscription $(CONNECTIVITY_SUB_ID)
         az deployment group create \
         --resource-group $(HUB_NETWORK_RG) \
         --template-file infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep \
