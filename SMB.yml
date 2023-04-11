@@ -140,7 +140,7 @@ jobs:
       inlineScript: |
         az deployment mg create \
         --template-file infra-as-code/bicep/orchestration/subPlacementAll/subPlacementAll.bicep \
-        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parPlatformManagementMgSubs='("$(MGMT_SUB_ID)")' parPlatformConnectivityMgSubs='("$(CONNECTIVITY_SUB_ID)")' parPlatformIdentityMgSubs='("$(IDENTITY_SUB_ID)")' parLandingZonesCorpMgSubs='("$(CORP_SUB_ID)")' parLandingZonesOnlineMgSubs='("$(ONLINE_SUB_ID)")' \
+        --parameters @infra-as-code/bicep/orchestration/subPlacementAll/parameters/subPlacementAll.parameters.all.json \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_subscription_placement-$(RunNumber)
