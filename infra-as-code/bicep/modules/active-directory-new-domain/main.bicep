@@ -87,8 +87,13 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2022-08-01' = {
     hardwareProfile: {
       vmSize: vmSize
     }
-    availabilitySet: {
-      id: availabilitySet.id
+    securityProfile: {
+      encryptionAtHost: true
+      securityType: "TrustedLaunch"
+      uefiSettings: {
+        secureBootEnabled: secureBootEnabled
+        vTpmEnabled: vTpmEnabled
+      }
     }
     osProfile: {
       computerName: virtualMachineName
@@ -122,6 +127,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2022-08-01' = {
     }
   }
   dependsOn: [
+    networkInterfaceName
   ]
 }
 
