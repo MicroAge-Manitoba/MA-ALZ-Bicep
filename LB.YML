@@ -39,3 +39,144 @@ jobs:
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_policy_defs-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Custom Role Definitions
+    name: create_rbac_roles
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az deployment mg create \
+        --template-file infra-as-code/bicep/modules/customRoleDefinitions/customRoleDefinitions.bicep \
+        --parameters parAssignableScopeManagementGroupId="$(MGMT_PREFIX)" \
+        --location $(Location) \
+        --management-group-id $(MGMT_PREFIX) \
+        --name create_rbac_roles-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Logging Resource Group
+    name: create_logging_rg
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(PLATFORM_SUB_ID)
+        az deployment sub create \
+        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
+        --parameters parResourceGroupName=$(LOGGING_RG) parLocation=$(Location) \
+        --location $(Location) \
+        --name create_logging_rg-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Logging
+    name: create_logging
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(PLATFORM_SUB_ID)
+        az deployment group create \
+        --resource-group $(LOGGING_RG) \
+        --template-file infra-as-code/bicep/modules/logging/logging.bicep \
+        --parameters parLogAnalyticsWorkspaceName="$(MGMT_PREFIX)-log-analytics" \
+        --name create_logging-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Hub Network Resource Group
+    name: create_hub_network_rg
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(PLATFORM_SUB_ID)
+        az deployment sub create \
+        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
+        --parameters parResourceGroupName="$(MGMT_PREFIX)-Hub-Vnet-RG" parLocation=$(Location) \
+        --location $(Location) \
+        --name create_hub_network_rg-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Hub Network
+    name: create_hub_network
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(PLATFORM_SUB_ID)
+        az deployment group create \
+        --resource-group "$(MGMT_PREFIX)-Hub-Vnet-RG" \
+        --template-file infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep \
+        --parameters parCompanyPrefix=$(MGMT_PREFIX) parAzBastionEnabled=$(BASTION_ENABLED) parDdosEnabled=$(DDOS_ENABLED) parAzFirewallEnabled=$(FIREWALL_ENABLED) \
+        --name create_hub_network-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Role Assignment
+    name: create_role_assignment
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az deployment mg create \
+        --template-file infra-as-code/bicep/modules/roleAssignments/roleAssignmentManagementGroup.bicep \
+        --parameters parRoleDefinitionId="8e3af657-a8ff-443c-a75c-2fe8c4bcb635" parAssigneePrincipalType="Group" parAssigneeObjectId=$(TENANT_ADMIN_OBJECT_ID) \
+        --location $(Location) \
+        --management-group-id $(MGMT_PREFIX)-platform \
+        --name create_role_assignment-$(RunNumber)
+
+  - task: DownloadSecureFile@1
+    name: subPlacementParams
+    displayName: 'Download sub placement paraments'
+    inputs:
+      secureFile: 'subPlacementAll.parameters.all.json'
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Subscription Placements
+    name: create_subscription_placement
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az deployment mg create \
+        --template-file infra-as-code/bicep/orchestration/subPlacementAll/subPlacementAll.bicep \
+        --parameters @$(subPlacementParams.secureFilePath) \
+        --location $(Location) \
+        --management-group-id $(MGMT_PREFIX) \
+        --name create_subscription_placement-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Deploy Default Policy Assignments
+    name: create_policy_assignments
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az deployment mg create \
+        --template-file infra-as-code/bicep/modules/policy/assignments/alzDefaults/alzDefaultPolicyAssignments.bicep \
+        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parLogAnalyticsWorkSpaceAndAutomationAccountLocation="canadacentral" parLogAnalyticsWorkspaceResourceId="/subscriptions/$(PLATFORM_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-logging/providers/Microsoft.OperationalInsights/workspaces/$(MGMT_PREFIX)-log-analytics" parAutomationAccountName="$(MGMT_PREFIX)-automation-account" parMsDefenderForCloudEmailSecurityContact="support@microagemanitoba.com" \
+        --location $(Location) \
+        --management-group-id $(MGMT_PREFIX) \
+        --name create_policy_assignments-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Spoke Network Peered to Hub
+    name: create_spoke_network
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az deployment mg create \
+        --template-file infra-as-code/bicep/orchestration/hubPeeredSpoke/hubPeeredSpoke.bicep \
+        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parPeeredVnetSubscriptionId=$(CORP_SUB_ID) parResourceGroupNameForSpokeNetworking=$(MGMT_PREFIX)-AVD-Vnet-RG parSpokeNetworkName=$(MGMT_PREFIX)-AVD-Vnet parSpokeToHubRouteTableName="AVD-to-hub" parHubVirtualNetworkId="/subscriptions/$(PLATFORM_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" \
+        --location $(Location) \
+        --management-group-id $(MGMT_PREFIX) \
+        --name create_spoke_network-$(RunNumber)
