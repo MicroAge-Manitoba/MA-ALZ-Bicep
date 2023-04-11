@@ -6,7 +6,7 @@ metadata description = 'Orchestration module that helps to define where all Subs
 @sys.description('Prefix for the management group hierarchy.  This management group will be created as part of the deployment. Default: alz')
 @minLength(2)
 @maxLength(10)
-param parTopLevelManagementGroupPrefix string = 'alz'
+param parTopLevelManagementGroupPrefix string = readEnvironmentVariable('MGMT_PREFIX')
 
 @sys.description('Optional suffix for the management group hierarchy. This suffix will be appended to management group names/IDs. Include a preceding dash if required. Example: -suffix')
 @maxLength(10)
@@ -19,22 +19,22 @@ param parIntRootMgSubs array = []
 param parPlatformMgSubs array = []
 
 @sys.description('An array of Subscription IDs to place in the (Platform) Management Management Group. Default: Empty Array')
-param parPlatformManagementMgSubs array = []
+param parPlatformManagementMgSubs array = [readEnvironmentVariable('MGMT_SUB_ID')]
 
 @sys.description('An array of Subscription IDs to place in the (Platform) Connectivity Management Group. Default: Empty Array')
-param parPlatformConnectivityMgSubs array = []
+param parPlatformConnectivityMgSubs array = [readEnvironmentVariable('CONNECTIVITY_SUB_ID')]
 
 @sys.description('An array of Subscription IDs to place in the (Platform) Identity Management Group. Default: Empty Array')
-param parPlatformIdentityMgSubs array = []
+param parPlatformIdentityMgSubs array = [readEnvironmentVariable('IDENTITY_SUB_ID')]
 
 @sys.description('An array of Subscription IDs to place in the Landing Zones Management Group. Default: Empty Array')
 param parLandingZonesMgSubs array = []
 
 @sys.description('An array of Subscription IDs to place in the Corp (Landing Zones) Management Group. Default: Empty Array')
-param parLandingZonesCorpMgSubs array = []
+param parLandingZonesCorpMgSubs array = [readEnvironmentVariable('CORP_SUB_ID')]
 
 @sys.description('An array of Subscription IDs to place in the Online (Landing Zones) Management Group. Default: Empty Array')
-param parLandingZonesOnlineMgSubs array = []
+param parLandingZonesOnlineMgSubs array = [readEnvironmentVariable('ONLINE_SUB_ID')]
 
 @sys.description('An array of Subscription IDs to place in the Confidential Corp (Landing Zones) Management Group. Default: Empty Array')
 param parLandingZonesConfidentialCorpMgSubs array = []

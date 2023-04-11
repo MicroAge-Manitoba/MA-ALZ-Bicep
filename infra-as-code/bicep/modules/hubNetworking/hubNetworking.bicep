@@ -16,10 +16,6 @@ param parHubNetworkAddressPrefix string = '10.10.0.0/16'
 @sys.description('The name and IP address range for each subnet in the virtual networks.')
 param parSubnets array = [
   {
-    name: 'AzureBastionSubnet'
-    ipAddressRange: '10.10.15.0/24'
-  }
-  {
     name: 'GatewaySubnet'
     ipAddressRange: '10.10.252.0/24'
   }
@@ -40,7 +36,7 @@ param parDnsServerIps array = []
 param parPublicIpSku string = 'Standard'
 
 @sys.description('Switch to enable/disable Azure Bastion deployment. Default: true')
-param parAzBastionEnabled bool = true
+param parAzBastionEnabled bool = false
 
 @sys.description('Name Associated with Bastion Service.')
 param parAzBastionName string = '${parCompanyPrefix}-bastion'
@@ -49,7 +45,7 @@ param parAzBastionName string = '${parCompanyPrefix}-bastion'
 param parAzBastionSku string = 'Standard'
 
 @sys.description('NSG Name for Azure Bastion Subnet NSG.')
-param parAzBastionNsgName string = 'nsg-AzureBastionSubnet'
+param parAzBastionNsgName string = ''
 
 @sys.description('Switch to enable/disable DDoS Network Protection deployment.')
 param parDdosEnabled bool = true
