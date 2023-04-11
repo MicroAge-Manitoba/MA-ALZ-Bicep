@@ -141,7 +141,7 @@ jobs:
       inlineScript: |
         az deployment mg create \
         --template-file infra-as-code/bicep/orchestration/subPlacementAll/subPlacementAll.bicep \
-        --parameters $(create_subscription_placement.secureFilePath) \
+        --parameters @$(create_subscription_placement.secureFilePath) \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_subscription_placement-$(RunNumber)
