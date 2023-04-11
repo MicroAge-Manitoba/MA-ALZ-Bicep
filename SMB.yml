@@ -171,6 +171,6 @@ jobs:
         az account set --subscription $(SPOKE_NETWORK_SUB_ID)
         az deployment sub create \
         --template-file infra-as-code/bicep/orchestration/hubPeeredSpoke/hubPeeredSpoke.bicep \
-        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parResourceGroupNameForSpokeNetworking=$(MGMT_PREFIX)-AVD-Vnet-RG parSpokeNetworkName=$(MGMT_PREFIX)-AVD-Vnet parSpokeToHubRouteTableName="AVD-to-hub" parHubVirtualNetworkId="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-VNet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" \
+        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parPeeredVnetSubscriptionId=$(CONNECTIVITY_SUB_ID) parResourceGroupNameForSpokeNetworking=$(MGMT_PREFIX)-AVD-Vnet-RG parSpokeNetworkName=$(MGMT_PREFIX)-AVD-Vnet parSpokeToHubRouteTableName="AVD-to-hub" parHubVirtualNetworkId="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-VNet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" \
         --location $(Location) \
         --name create_spoke_network-$(RunNumber)
