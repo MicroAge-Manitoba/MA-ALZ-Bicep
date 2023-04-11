@@ -43,8 +43,6 @@ param subnetName string = 'adSubnet'
 @description('Subnet IP range.')
 param subnetRange string = '10.0.0.0/24'
 
-@description('Availability set name.')
-param availabilitySetName string = 'adAvailabiltySet'
 
 module VNet 'nestedtemplates/vnet.bicep' = {
   scope: resourceGroup()
@@ -91,8 +89,8 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2022-08-01' = {
       encryptionAtHost: true
       securityType: "TrustedLaunch"
       uefiSettings: {
-        secureBootEnabled: secureBootEnabled
-        vTpmEnabled: vTpmEnabled
+        secureBootEnabled: true
+        vTpmEnabled: true
       }
     }
     osProfile: {
