@@ -129,19 +129,24 @@ jobs:
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX)-platform \
         --name create_role_assignment-$(RunNumber)
+        
+  - task: DownloadSecureFile@1
+    name: subPlacementParams
+    displayName: 'Download sub placement paraments'
+    inputs:
+      secureFile: 'subPlacementAll.parameters.all.json'
 
   - task: AzureCLI@2
     displayName: Az CLI Deploy Subscription Placements
     name: create_subscription_placement
     inputs:
-      secureFile: 'subPlacementAll.parameters.all.json'
       azureSubscription: $(ServiceConnectionName)
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
         az deployment mg create \
         --template-file infra-as-code/bicep/orchestration/subPlacementAll/subPlacementAll.bicep \
-        --parameters @$(create_subscription_placement.secureFilePath) \
+        --parameters @$(subPlacementParams.secureFilePath) \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_subscription_placement-$(RunNumber)
