@@ -31,7 +31,15 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-07-01' = {
         name: subnetName
         properties: {
           addressPrefix: subnetRange
-          networkSecurityGroupId: networkSecurityGroup.id
+          networkSecurityGroup: {
+            id: networkSecurityGroup.id
+            location: location
+            properties: {
+              flushConnection: false
+              securityRules: [
+              ]
+            }
+          }
         }
       }
     ]
