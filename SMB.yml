@@ -209,7 +209,6 @@ jobs:
         --resource-group "$(MGMT_PREFIX)-Identity-RG" \
         --template-file infra-as-code/bicep/modules/active-directory-new-domain/main.bicep \
         --parameters adminUsername="microage" adminPassword=$(DC_PASSWORD) domainName=$(DOMAIN_NAME) vmSize="Standard_D2ds_V5" virtualMachineName=$(MGMT_PREFIX)-DC virtualNetworkName=$(MGMT_PREFIX)-Identity-Vnet virtualNetworkAddressRange="10.5.0.0/16" privateIPAddress="10.5.1.4" subnetName="default" subnetRange="10.5.1.0/24" \
-        --location $(Location) \
         --name create_dc-$(RunNumber)
 
   - task: AzureCLI@2
@@ -225,5 +224,4 @@ jobs:
         --resource-group "$(MGMT_PREFIX)-Identity-RG"
         --template-file infra-as-code/bicep/modules/active-directory-new-domain/main.bicep \
         --parameters parDestinationVirtualNetwork="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" parSourceVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" \
-        --location $(Location) \
         --name peer_identity_vnet-$(RunNumber)
