@@ -13,6 +13,10 @@ param subnetRange string
 @description('Location for all resources.')
 param location string
 
+resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-07-01' = {
+  name: '${virtualNetworkName}-default-nsg'
+}
+
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-07-01' = {
   name: virtualNetworkName
   location: location
@@ -27,8 +31,12 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-07-01' = {
         name: subnetName
         properties: {
           addressPrefix: subnetRange
-        }
+        },
+        networkSecurityGroupId: networkSecurityGroup.id
       }
     ]
-  }
+  },
+  dependsOn: [
+    networkSecurityGroup
+  ]
 }
