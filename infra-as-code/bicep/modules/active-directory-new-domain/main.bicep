@@ -78,14 +78,6 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2022-08-01' = {
     hardwareProfile: {
       vmSize: vmSize
     }
-    securityProfile: {
-      encryptionAtHost: false
-      securityType: 'TrustedLaunch'
-      uefiSettings: {
-        secureBootEnabled: true
-        vTpmEnabled: true
-      }
-    }
     osProfile: {
       computerName: virtualMachineName
       adminUsername: adminUsername
