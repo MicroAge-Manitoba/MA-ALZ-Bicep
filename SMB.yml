@@ -127,7 +127,7 @@ jobs:
         az deployment group create \
         --resource-group "$(MGMT_PREFIX)-Hub-Vnet-RG" \
         --template-file infra-as-code/bicep/modules/virtualNetworkGateways/deploy.bicep \
-        --parameters name="$(MGMT_PREFIX)-GW" location=$(Location) gatewayType="Vpn" vpnGatewayGeneration="Generation1" skuName="Basic" vNetResourceId="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" \
+        --parameters name="$(MGMT_PREFIX)-GW" location=$(Location) gatewayType="Vpn" vpnGatewayGeneration="Generation1" skuName="HighPerformance" vNetResourceId="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" \
         --name create_hub_network_gw-$(RunNumber)
 
   - task: AzureCLI@2
