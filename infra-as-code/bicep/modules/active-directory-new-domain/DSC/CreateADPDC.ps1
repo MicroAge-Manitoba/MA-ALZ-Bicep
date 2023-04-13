@@ -63,7 +63,7 @@ configuration CreateADPDC
             DependsOn      = "[WindowsFeature]DNS"
         }
 
-        xWaitforDisk Disk2
+        xWaitforDisk Disk1
         {
             DiskNumber = 1
             RetryIntervalSec =$RetryIntervalSec
@@ -73,7 +73,7 @@ configuration CreateADPDC
         xDisk ADDataDisk {
             DiskNumber  = 1
             DriveLetter = "C"
-            DependsOn   = "[xWaitForDisk]Disk2"
+            DependsOn   = "[xWaitForDisk]Disk1"
         }
 
         WindowsFeature ADDSInstall { 
