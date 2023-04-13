@@ -15,6 +15,7 @@ param location string
 
 resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-07-01' = {
   name: '${virtualNetworkName}-default-nsg'
+  location: location
 }
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-07-01' = {
