@@ -116,6 +116,66 @@ jobs:
         --name create_hub_network-$(RunNumber)
 
   - task: AzureCLI@2
+    displayName: Az CLI Deploy Hub Network GW
+    name: create_hub_network
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(CONNECTIVITY_SUB_ID)
+        az deployment group create \
+        --resource-group "$(MGMT_PREFIX)-Hub-Vnet-RG" \
+        --template-file infra-as-code/bicep/modules/virtualNetworkGateways/deploy.bicep \
+        --parameters name="$(MGMT_PREFIX)-GW" location=$(Location) gatewayType="Vpn" vpnGatewayGeneration="Generation1" skuName="Basic" vNetResourceId="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" \
+        --name create_hub_network-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Identity Resource Group
+    name: create_identity_rg
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(IDENTITY_SUB_ID)
+        az deployment sub create \
+        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
+        --parameters parResourceGroupName="$(MGMT_PREFIX)-Identity-RG" parLocation=$(Location) \
+        --location $(Location) \
+        --name create_identity_rg-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Domain Controller
+    name: create_dc
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(IDENTITY_SUB_ID)
+        az deployment group create \
+        --resource-group "$(MGMT_PREFIX)-Identity-RG" \
+        --template-file infra-as-code/bicep/modules/active-directory-new-domain/main.bicep \
+        --parameters adminUsername="microage" adminPassword=$(DC_PASSWORD) domainName=$(DOMAIN_NAME) vmSize="Standard_D2ds_V5" virtualMachineName=$(MGMT_PREFIX)-DC virtualNetworkName=$(MGMT_PREFIX)-Identity-Vnet virtualNetworkAddressRange="10.5.0.0/16" privateIPAddress="10.5.1.4" subnetName="default" subnetRange="10.5.1.0/24" \
+        --name create_dc-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Peer Identity Vnet
+    name: peer_identity_vnet
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(IDENTITY_SUB_ID)
+        az deployment group create \
+        --resource-group "$(MGMT_PREFIX)-Identity-RG"
+        --template-file infra-as-code/bicep/modules/active-directory-new-domain/main.bicep \
+        --parameters parDestinationVirtualNetwork="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" parSourceVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" \
+        --name peer_identity_vnet-$(RunNumber)
+
+  - task: AzureCLI@2
     displayName: Az CLI Deploy Role Assignment
     name: create_role_assignment
     inputs:
@@ -180,48 +240,3 @@ jobs:
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_spoke_network-$(RunNumber)
-
-  - task: AzureCLI@2
-    displayName: Az CLI Deploy Identity Resource Group
-    name: create_identity_rg
-    inputs:
-      azureSubscription: $(ServiceConnectionName)
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az account set --subscription $(IDENTITY_SUB_ID)
-        az deployment sub create \
-        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
-        --parameters parResourceGroupName="$(MGMT_PREFIX)-Identity-RG" parLocation=$(Location) \
-        --location $(Location) \
-        --name create_identity_rg-$(RunNumber)
-
-  - task: AzureCLI@2
-    displayName: Az CLI Deploy Domain Controller
-    name: create_dc
-    inputs:
-      azureSubscription: $(ServiceConnectionName)
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az account set --subscription $(IDENTITY_SUB_ID)
-        az deployment group create \
-        --resource-group "$(MGMT_PREFIX)-Identity-RG" \
-        --template-file infra-as-code/bicep/modules/active-directory-new-domain/main.bicep \
-        --parameters adminUsername="microage" adminPassword=$(DC_PASSWORD) domainName=$(DOMAIN_NAME) vmSize="Standard_D2ds_V5" virtualMachineName=$(MGMT_PREFIX)-DC virtualNetworkName=$(MGMT_PREFIX)-Identity-Vnet virtualNetworkAddressRange="10.5.0.0/16" privateIPAddress="10.5.1.4" subnetName="default" subnetRange="10.5.1.0/24" \
-        --name create_dc-$(RunNumber)
-
-  - task: AzureCLI@2
-    displayName: Az CLI Peer Identity Vnet
-    name: peer_identity_vnet
-    inputs:
-      azureSubscription: $(ServiceConnectionName)
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az account set --subscription $(IDENTITY_SUB_ID)
-        az deployment group create \
-        --resource-group "$(MGMT_PREFIX)-Identity-RG"
-        --template-file infra-as-code/bicep/modules/active-directory-new-domain/main.bicep \
-        --parameters parDestinationVirtualNetwork="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" parSourceVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" \
-        --name peer_identity_vnet-$(RunNumber)

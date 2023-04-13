@@ -187,8 +187,7 @@ param parPrivateDnsZones array = [
 "parVpnGatewayConfig": {
   "value": {}
 }''')
-param parVpnGatewayConfig object = {
-}
+param parVpnGatewayConfig object = {}
 
 @sys.description('''Configuration for ExpressRoute virtual network gateway to be deployed. If a ExpressRoute virtual network gateway is not desired an empty object should be used as the input parameter in the parameter file, i.e.
 "parExpressRouteGatewayConfig": {
