@@ -124,7 +124,7 @@ resource createADForest 'Microsoft.Compute/virtualMachines/extensions@2022-08-01
     typeHandlerVersion: '2.19'
     autoUpgradeMinorVersion: true
     settings: {
-      ModulesUrl: 'https://github.com/Azure/azure-quickstart-templates/blob/master/application-workloads/active-directory/active-directory-new-domain/DSC/CreateADPDC.zip?raw=true'
+      ModulesUrl: 'https://github.com/MicroAge-Manitoba/MA-ALZ-Bicep/blob/main/infra-as-code/bicep/modules/active-directory-new-domain/DSC/CreateADPDC.zip?raw=true'
       ConfigurationFunction: 'CreateADPDC.ps1\\CreateADPDC'
       Properties: {
         DomainName: domainName
