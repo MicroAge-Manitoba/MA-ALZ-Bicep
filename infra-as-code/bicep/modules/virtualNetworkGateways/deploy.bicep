@@ -67,10 +67,10 @@ param vpnType string = 'RouteBased'
 param vNetResourceId string
 
 @description('Optional. Value to specify if the Gateway should be deployed in active-active or active-passive configuration.')
-param activeActive bool = true
+param activeActive bool = false
 
 @description('Optional. Value to specify if BGP is enabled or not.')
-param enableBgp bool = true
+param enableBgp bool = false
 
 @description('Optional. ASN value.')
 param asn int = 65815
