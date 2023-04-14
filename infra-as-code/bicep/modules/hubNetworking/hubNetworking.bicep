@@ -264,34 +264,6 @@ module modBastionPublicIp '../publicIp/publicIp.bicep' = if (parAzBastionEnabled
   }
 }
 
-// AzureBastionSubnet is required to deploy Bastion service. This subnet must exist in the parsubnets array if you enable Bastion Service.
-// There is a minimum subnet requirement of /27 prefix.
-// If you are deploying standard this needs to be larger. https://docs.microsoft.com/en-us/azure/bastion/configuration-settings#subnet
-resource resBastion 'Microsoft.Network/bastionHosts@2021-08-01' = if (parAzBastionEnabled) {
-  location: parLocation
-  name: parAzBastionName
-  tags: parTags
-  sku: {
-    name: parAzBastionSku
-  }
-  properties: {
-    dnsName: uniqueString(resourceGroup().id)
-    ipConfigurations: [
-      {
-        name: 'IpConf'
-        properties: {
-          subnet: {
-            id: resBastionSubnetRef.id
-          }
-          publicIPAddress: {
-            id: parAzBastionEnabled ? modBastionPublicIp.outputs.outPublicIpId : ''
-          }
-        }
-      }
-    ]
-  }
-}
-
 resource resGatewaySubnetRef 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = {
   parent: resHubVnet
   name: 'GatewaySubnet'
