@@ -63,19 +63,6 @@ configuration CreateADPDC
             DependsOn      = "[WindowsFeature]DNS"
         }
 
-        xWaitforDisk Disk1
-        {
-            DiskNumber = 1
-            RetryIntervalSec =$RetryIntervalSec
-            RetryCount = $RetryCount
-        }
-
-        xDisk ADDataDisk {
-            DiskNumber  = 1
-            DriveLetter = "C"
-            DependsOn   = "[xWaitForDisk]Disk1"
-        }
-
         WindowsFeature ADDSInstall { 
             Ensure    = "Present" 
             Name      = "AD-Domain-Services"
@@ -102,7 +89,7 @@ configuration CreateADPDC
             DatabasePath                  = "C:\NTDS"
             LogPath                       = "C:\NTDS"
             SysvolPath                    = "C:\SYSVOL"
-            DependsOn                     = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall")
+            DependsOn                     = @("[WindowsFeature]ADDSInstall")
         } 
 
     }
