@@ -1,6 +1,6 @@
 @maxLength(24)
 @description('Required. Name of the Storage Account.')
-param name string
+param name string = 'profilesa${uniqueString(resourceGroup().id)}'
 
 @description('Optional. Location for all resources.')
 param location string = resourceGroup().location
