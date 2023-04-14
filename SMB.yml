@@ -213,7 +213,7 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $(IDENTITY_SUB_ID)
+        az account set --subscription $(CORP_SUB_ID)
         az deployment group create \
         --resource-group "$(MGMT_PREFIX)-AVD-RG" \
         --template-file infra-as-code/bicep/modules/storageAccounts/deploy.bicep \
