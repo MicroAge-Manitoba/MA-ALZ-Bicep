@@ -112,7 +112,7 @@ jobs:
         az deployment group create \
         --resource-group "$(MGMT_PREFIX)-Hub-Vnet-RG" \
         --template-file infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep \
-        --parameters parCompanyPrefix=$(MGMT_PREFIX) parAzBastionEnabled=$(BASTION_ENABLED) parDdosEnabled=$(DDOS_ENABLED) parAzFirewallEnabled=$(FIREWALL_ENABLED) \
+        --parameters parCompanyPrefix=$(MGMT_PREFIX) \
         --name create_hub_network-$(RunNumber)
 
   - task: AzureCLI@2
