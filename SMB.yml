@@ -217,7 +217,7 @@ jobs:
         az deployment group create \
         --resource-group "$(MGMT_PREFIX)-AVD-RG" \
         --template-file infra-as-code/bicep/modules/storageAccounts/deploy.bicep \
-        --parameters name=$(MGMT_PREFIX)profilesa skuName="Premium_LRS" largeFileSharesState="Enabled" \
+        --parameters name=profilesa skuName="Premium_LRS" largeFileSharesState="Enabled" \
         --name create_sa-$(RunNumber)
 
   - task: AzureCLI@2
