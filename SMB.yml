@@ -52,7 +52,7 @@ jobs:
         az deployment group create \
         --resource-group "$(MGMT_PREFIX)-Identity-RG" \
         --template-file infra-as-code/bicep/modules/active-directory-new-domain/main.bicep \
-        --parameters location=$(Location) adminUsername="microage" adminPassword=$(DC_PASSWORD) domainName=$(DOMAIN_NAME) vmSize="Standard_D2as_V5" virtualMachineName=$(MGMT_PREFIX)-DC virtualNetworkName=$(MGMT_PREFIX)-Identity-Vnet virtualNetworkAddressRange="10.5.0.0/16" privateIPAddress="10.5.1.4" subnetName="default" subnetRange="10.5.1.0/24" \
+        --parameters location=$(Location) adminUsername="microage" adminPassword=$(DC_PASSWORD) domainName=$(DOMAIN_NAME) vmSize="Standard_D2as_V5" virtualMachineName=$(MGMT_PREFIX)-DC virtualNetworkName=$(MGMT_PREFIX)-Identity-Vnet virtualNetworkAddressRange="10.5.0.0/16" privateIPAddress="10.5.1.4" subnetName="default" subnetRange="10.5.1.0/24" networkInterfaceName="$(MGMT_PREFIX)-DC-NIC" \
         --name create_dc-$(RunNumber)
 
   - task: AzureCLI@2
