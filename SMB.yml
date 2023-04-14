@@ -170,7 +170,7 @@ jobs:
       inlineScript: |
         az account set --subscription $(IDENTITY_SUB_ID)
         az deployment group create \
-        --resource-group "$(MGMT_PREFIX)-Identity-RG"
+        --resource-group "$(MGMT_PREFIX)-Identity-RG" \
         --template-file infra-as-code/bicep/modules/active-directory-new-domain/main.bicep \
         --parameters parDestinationVirtualNetwork="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" parSourceVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" \
         --name peer_identity_vnet-$(RunNumber)
