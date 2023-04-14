@@ -345,7 +345,7 @@ module storageAccount_roleAssignments '.bicep/nested_roleAssignments.bicep' = [f
   }
 }]
 
-module storageAccount_privateEndpoints '../../Microsoft.Network/privateEndpoints/deploy.bicep' = [for (privateEndpoint, index) in privateEndpoints: {
+module storageAccount_privateEndpoints '../privateEndpoints/deploy.bicep' = [for (privateEndpoint, index) in privateEndpoints: {
   name: '${uniqueString(deployment().name, location)}-StorageAccount-PrivateEndpoint-${index}'
   params: {
     groupIds: [
