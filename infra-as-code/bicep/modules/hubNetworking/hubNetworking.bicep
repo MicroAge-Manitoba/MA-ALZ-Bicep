@@ -322,11 +322,6 @@ resource resGateway 'Microsoft.Network/virtualNetworkGateways@2022-07-01' = [for
   }
 }]
 
-resource resAzureFirewallSubnetRef 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = {
-  parent: resHubVnet
-  name: 'AzureFirewallSubnet'
-}
-
 module modAzureFirewallPublicIp '../publicIp/publicIp.bicep' = if (parAzFirewallEnabled) {
   name: 'deploy-Firewall-Public-IP'
   params: {
