@@ -45,7 +45,7 @@ param parSpokeNetworkName string = 'vnet-spoke'
 param parSpokeNetworkAddressPrefix string = '10.11.0.0/16'
 
 @sys.description('Array of DNS Server IP addresses for VNet. Default: Empty Array')
-param parDnsServerIps  array = []
+param parDnsServerIps  array = ['10.5.1.4']
 
 @sys.description('IP Address where network traffic should route to. Default: Empty string')
 param parNextHopIpAddress string = ''

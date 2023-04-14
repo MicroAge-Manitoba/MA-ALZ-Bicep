@@ -161,8 +161,8 @@ jobs:
         --name create_dc-$(RunNumber)
 
   - task: AzureCLI@2
-    displayName: Az CLI Peer Identity Vnet
-    name: peer_identity_vnet
+    displayName: Az CLI Peer Identity Vnet to Hub
+    name: peer_identity_vnet_to_hub
     inputs:
       azureSubscription: $(ServiceConnectionName)
       scriptType: 'bash'
@@ -173,7 +173,52 @@ jobs:
         --resource-group "$(MGMT_PREFIX)-Identity-RG" \
         --template-file infra-as-code/bicep/modules/vnetPeering/vnetPeering.bicep \
         --parameters parDestinationVirtualNetworkId="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" parSourceVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" \
-        --name peer_identity_vnet-$(RunNumber)
+        --name peer_identity_vnet_to_hub-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Peer Hub Vnet to Identity
+    name: peer_hub_vnet_to_identity
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(CONNECTIVITY_SUB_ID)
+        az deployment group create \
+        --resource-group "$(MGMT_PREFIX)-Hub-Vnet-RG" \
+        --template-file infra-as-code/bicep/modules/vnetPeering/vnetPeering.bicep \
+        --parameters parDestinationVirtualNetworkId="/subscriptions/$(IDENTITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Identity-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-Identity-Vnet" parSourceVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" \
+        --name peer_hub_vnet_to_identity-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Azure Files Resource Group
+    name: create_af_rg
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(CORP_SUB_ID)
+        az deployment sub create \
+        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
+        --parameters parResourceGroupName="$(MGMT_PREFIX)-AVD-RG" parLocation=$(Location) \
+        --location $(Location) \
+        --name create_af_rg-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Create Storage Account
+    name: create_sa
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(IDENTITY_SUB_ID)
+        az deployment group create \
+        --resource-group "$(MGMT_PREFIX)-AVD-RG" \
+        --template-file infra-as-code/bicep/modules/storageAccounts/deploy.bicep \
+        --parameters name=$(MGMT_PREFIX)profilesa skuName="Premium_LRS" largeFileSharesState="Enabled" \
+        --name create_sa-$(RunNumber)
 
   - task: AzureCLI@2
     displayName: Az CLI Deploy Role Assignment

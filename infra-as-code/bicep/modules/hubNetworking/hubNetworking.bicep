@@ -16,21 +16,13 @@ param parHubNetworkAddressPrefix string = '10.10.0.0/16'
 @sys.description('The name and IP address range for each subnet in the virtual networks.')
 param parSubnets array = [
   {
-    name: 'AzureBastionSubnet'
-    ipAddressRange: '10.10.15.0/24'
-  }
-  {
     name: 'GatewaySubnet'
     ipAddressRange: '10.10.252.0/24'
-  }
-  {
-    name: 'AzureFirewallSubnet'
-    ipAddressRange: '10.10.254.0/24'
   }
 ]
 
 @sys.description('Array of DNS Server IP addresses for VNet.')
-param parDnsServerIps array = []
+param parDnsServerIps array = ['10.5.1.4']
 
 @sys.description('Public IP Address SKU.')
 @allowed([
@@ -235,9 +227,6 @@ resource resDdosProtectionPlan 'Microsoft.Network/ddosProtectionPlans@2021-08-01
 
 //DDos Protection plan will only be enabled if parDdosEnabled is true.
 resource resHubVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
-  dependsOn: [
-    resBastionNsg
-  ]
   name: parHubNetworkName
   location: parLocation
   tags: parTags
@@ -272,160 +261,6 @@ module modBastionPublicIp '../publicIp/publicIp.bicep' = if (parAzBastionEnabled
     }
     parTags: parTags
     parTelemetryOptOut: parTelemetryOptOut
-  }
-}
-
-resource resBastionSubnetRef 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = {
-  parent: resHubVnet
-  name: 'AzureBastionSubnet'
-}
-
-resource resBastionNsg 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
-  name: parAzBastionNsgName
-  location: parLocation
-  tags: parTags
-
-  properties: {
-    securityRules: [
-      // Inbound Rules
-      {
-        name: 'AllowHttpsInbound'
-        properties: {
-          access: 'Allow'
-          direction: 'Inbound'
-          priority: 120
-          sourceAddressPrefix: 'Internet'
-          destinationAddressPrefix: '*'
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '443'
-        }
-      }
-      {
-        name: 'AllowGatewayManagerInbound'
-        properties: {
-          access: 'Allow'
-          direction: 'Inbound'
-          priority: 130
-          sourceAddressPrefix: 'GatewayManager'
-          destinationAddressPrefix: '*'
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '443'
-        }
-      }
-      {
-        name: 'AllowAzureLoadBalancerInbound'
-        properties: {
-          access: 'Allow'
-          direction: 'Inbound'
-          priority: 140
-          sourceAddressPrefix: 'AzureLoadBalancer'
-          destinationAddressPrefix: '*'
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '443'
-        }
-      }
-      {
-        name: 'AllowBastionHostCommunication'
-        properties: {
-          access: 'Allow'
-          direction: 'Inbound'
-          priority: 150
-          sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: 'VirtualNetwork'
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRanges: [
-            '8080'
-            '5701'
-          ]
-        }
-      }
-      {
-        name: 'DenyAllInbound'
-        properties: {
-          access: 'Deny'
-          direction: 'Inbound'
-          priority: 4096
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRange: '*'
-        }
-      }
-      // Outbound Rules
-      {
-        name: 'AllowSshRdpOutbound'
-        properties: {
-          access: 'Allow'
-          direction: 'Outbound'
-          priority: 100
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: 'VirtualNetwork'
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRanges: parBastionOutboundSshRdpPorts
-        }
-      }
-      {
-        name: 'AllowAzureCloudOutbound'
-        properties: {
-          access: 'Allow'
-          direction: 'Outbound'
-          priority: 110
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: 'AzureCloud'
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '443'
-        }
-      }
-      {
-        name: 'AllowBastionCommunication'
-        properties: {
-          access: 'Allow'
-          direction: 'Outbound'
-          priority: 120
-          sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: 'VirtualNetwork'
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRanges: [
-            '8080'
-            '5701'
-          ]
-        }
-      }
-      {
-        name: 'AllowGetSessionInformation'
-        properties: {
-          access: 'Allow'
-          direction: 'Outbound'
-          priority: 130
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: 'Internet'
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRange: '80'
-        }
-      }
-      {
-        name: 'DenyAllOutbound'
-        properties: {
-          access: 'Deny'
-          direction: 'Outbound'
-          priority: 4096
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRange: '*'
-        }
-      }
-    ]
   }
 }
 
