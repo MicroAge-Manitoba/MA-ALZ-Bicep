@@ -221,7 +221,7 @@ jobs:
       inlineScript: |
         az deployment mg create \
         --template-file infra-as-code/bicep/modules/policy/assignments/alzDefaults/alzDefaultPolicyAssignments.bicep \
-        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parLogAnalyticsWorkSpaceAndAutomationAccountLocation="canadacentral" parLogAnalyticsWorkspaceResourceId="/subscriptions/$(MGMT_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-logging/providers/Microsoft.OperationalInsights/workspaces/$(MGMT_PREFIX)-log-analytics" parAutomationAccountName="$(MGMT_PREFIX)-automation-account" parMsDefenderForCloudEmailSecurityContact="support@microagemanitoba.com" \
+        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parLogAnalyticsWorkSpaceAndAutomationAccountLocation="canadacentral" parLogAnalyticsWorkspaceResourceId="/subscriptions/$(MGMT_SUB_ID)/resourceGroups/$(LOGGING_RG)/providers/Microsoft.OperationalInsights/workspaces/$(MGMT_PREFIX)-log-analytics" parAutomationAccountName="$(MGMT_PREFIX)-automation-account" parMsDefenderForCloudEmailSecurityContact="support@microagemanitoba.com" \
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_policy_assignments-$(RunNumber)
