@@ -26,6 +26,7 @@ jobs:
         --name create_mgs-$(RunNumber)
 - job: C_POLICY
   dependsOn: "MGMT"
+  pool: "Default"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Custom Policy Definitions
@@ -59,6 +60,7 @@ jobs:
         --management-group-id $(MGMT_PREFIX) \
         --name create_rbac_roles-$(RunNumber)
 - job: RG_LOG
+  pool: "Default"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Logging Resource Group
@@ -91,6 +93,7 @@ jobs:
         --location $(Location) \
         --name create_hub_network_rg-$(RunNumber)
 - job: RG_ID
+  pool: "Default"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Identity Resource Group
@@ -123,6 +126,7 @@ jobs:
         --location $(Location) \
         --name create_af_rg-$(RunNumber)
 - job: RG_AVD
+  pool: "Default"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy AVD Resource Group
@@ -156,6 +160,7 @@ jobs:
         --parameters parLogAnalyticsWorkspaceName="$(MGMT_PREFIX)-log-analytics" \
         --name create_logging-$(RunNumber)
 - job: HUB
+  pool: "Default"
   dependsOn: "RG_HUB"
   steps:
   - task: AzureCLI@2
@@ -252,6 +257,7 @@ jobs:
         --parameters parDestinationVirtualNetworkId="/subscriptions/$(IDENTITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Identity-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-Identity-Vnet" parSourceVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" \
         --name peer_hub_vnet_to_identity-$(RunNumber)
 - job: SA
+  pool: "Default"
   dependsOn: "RG_AF"
   steps:
   - task: AzureCLI@2
