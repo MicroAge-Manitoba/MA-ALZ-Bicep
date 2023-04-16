@@ -17,7 +17,7 @@ param parAllowVirtualNetworkAccess bool = true
 param parAllowForwardedTraffic bool = true
 
 @sys.description('Switch to enable/disable gateway transit for the Network Peer.')
-param parAllowGatewayTransit bool = false
+param parAllowGatewayTransit bool = true
 
 @sys.description('Switch to enable/disable remote gateway for the Network Peer.')
 param parUseRemoteGateways bool = false

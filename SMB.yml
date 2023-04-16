@@ -9,7 +9,7 @@ variables:
   RunNumber: $(Build.BuildNumber)
 
 jobs:
-- job:
+- job: Deploy Management Groups, Policies, and Roles
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Management Groups
@@ -54,7 +54,8 @@ jobs:
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_rbac_roles-$(RunNumber)
-
+- job: Deploy Resource Groups
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Logging Resource Group
     name: create_logging_rg
@@ -71,21 +72,6 @@ jobs:
         --name create_logging_rg-$(RunNumber)
 
   - task: AzureCLI@2
-    displayName: Az CLI Deploy Logging
-    name: create_logging
-    inputs:
-      azureSubscription: $(ServiceConnectionName)
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az account set --subscription $(LOGGING_SUB_ID)
-        az deployment group create \
-        --resource-group $(LOGGING_RG) \
-        --template-file infra-as-code/bicep/modules/logging/logging.bicep \
-        --parameters parLogAnalyticsWorkspaceName="$(MGMT_PREFIX)-log-analytics" \
-        --name create_logging-$(RunNumber)
-
-  - task: AzureCLI@2
     displayName: Az CLI Deploy Hub Network Resource Group
     name: create_hub_network_rg
     inputs:
@@ -100,6 +86,68 @@ jobs:
         --location $(Location) \
         --name create_hub_network_rg-$(RunNumber)
 
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Identity Resource Group
+    name: create_identity_rg
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(IDENTITY_SUB_ID)
+        az deployment sub create \
+        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
+        --parameters parResourceGroupName="$(MGMT_PREFIX)-Identity-RG" parLocation=$(Location) \
+        --location $(Location) \
+        --name create_identity_rg-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Azure Files Resource Group
+    name: create_af_rg
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(CORP_SUB_ID)
+        az deployment sub create \
+        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
+        --parameters parResourceGroupName="$(MGMT_PREFIX)-AF-RG" parLocation=$(Location) \
+        --location $(Location) \
+        --name create_af_rg-$(RunNumber)
+
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy AVD Resource Group
+    name: create_avd_rg
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(CORP_SUB_ID)
+        az deployment sub create \
+        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
+        --parameters parResourceGroupName="$(MGMT_PREFIX)-AVD-RG" parLocation=$(Location) \
+        --location $(Location) \
+        --name create_avd_rg-$(RunNumber)
+- job: Deploy Logging
+  steps:
+  - task: AzureCLI@2
+    displayName: Az CLI Deploy Logging
+    name: create_logging
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account set --subscription $(LOGGING_SUB_ID)
+        az deployment group create \
+        --resource-group $(LOGGING_RG) \
+        --template-file infra-as-code/bicep/modules/logging/logging.bicep \
+        --parameters parLogAnalyticsWorkspaceName="$(MGMT_PREFIX)-log-analytics" \
+        --name create_logging-$(RunNumber)
+- job: Deploy Hub and AVD Spoke
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Hub Network
     name: create_hub_network
@@ -131,20 +179,21 @@ jobs:
         --name create_hub_network_gw-$(RunNumber)
 
   - task: AzureCLI@2
-    displayName: Az CLI Deploy Identity Resource Group
-    name: create_identity_rg
+    displayName: Az CLI Deploy Spoke Network Peered to Hub
+    name: create_spoke_network
     inputs:
       azureSubscription: $(ServiceConnectionName)
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az account set --subscription $(IDENTITY_SUB_ID)
-        az deployment sub create \
-        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
-        --parameters parResourceGroupName="$(MGMT_PREFIX)-Identity-RG" parLocation=$(Location) \
+        az deployment mg create \
+        --template-file infra-as-code/bicep/orchestration/hubPeeredSpoke/hubPeeredSpoke.bicep \
+        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parPeeredVnetSubscriptionId=$(CORP_SUB_ID) parResourceGroupNameForSpokeNetworking=$(MGMT_PREFIX)-AVD-Vnet-RG parSpokeNetworkName=$(MGMT_PREFIX)-AVD-Vnet parSpokeToHubRouteTableName="AVD-to-hub" parHubVirtualNetworkId="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" \
         --location $(Location) \
-        --name create_identity_rg-$(RunNumber)
-
+        --management-group-id $(MGMT_PREFIX) \
+        --name create_spoke_network-$(RunNumber)
+- job: Deploy Identity RG
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Domain Controller
     name: create_dc
@@ -189,22 +238,8 @@ jobs:
         --template-file infra-as-code/bicep/modules/vnetPeering/vnetPeering.bicep \
         --parameters parDestinationVirtualNetworkId="/subscriptions/$(IDENTITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Identity-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-Identity-Vnet" parSourceVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" \
         --name peer_hub_vnet_to_identity-$(RunNumber)
-
-  - task: AzureCLI@2
-    displayName: Az CLI Deploy Azure Files Resource Group
-    name: create_af_rg
-    inputs:
-      azureSubscription: $(ServiceConnectionName)
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az account set --subscription $(CORP_SUB_ID)
-        az deployment sub create \
-        --template-file infra-as-code/bicep/modules/resourceGroup/resourceGroup.bicep \
-        --parameters parResourceGroupName="$(MGMT_PREFIX)-AVD-RG" parLocation=$(Location) \
-        --location $(Location) \
-        --name create_af_rg-$(RunNumber)
-
+- job: Deploy Storage Account
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Create Storage Account
     name: create_sa
@@ -215,11 +250,12 @@ jobs:
       inlineScript: |
         az account set --subscription $(CORP_SUB_ID)
         az deployment group create \
-        --resource-group "$(MGMT_PREFIX)-AVD-RG" \
+        --resource-group "$(MGMT_PREFIX)-AF-RG" \
         --template-file infra-as-code/bicep/modules/storageAccounts/deploy.bicep \
         --parameters skuName="Premium_LRS" largeFileSharesState="Enabled" \
         --name create_sa-$(RunNumber)
-
+- job: Deploy role and policy assignments, and palce subscriptions
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Role Assignment
     name: create_role_assignment
@@ -270,18 +306,3 @@ jobs:
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_policy_assignments-$(RunNumber)
-
-  - task: AzureCLI@2
-    displayName: Az CLI Deploy Spoke Network Peered to Hub
-    name: create_spoke_network
-    inputs:
-      azureSubscription: $(ServiceConnectionName)
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az deployment mg create \
-        --template-file infra-as-code/bicep/orchestration/hubPeeredSpoke/hubPeeredSpoke.bicep \
-        --parameters parTopLevelManagementGroupPrefix=$(MGMT_PREFIX) parPeeredVnetSubscriptionId=$(CORP_SUB_ID) parResourceGroupNameForSpokeNetworking=$(MGMT_PREFIX)-AVD-Vnet-RG parSpokeNetworkName=$(MGMT_PREFIX)-AVD-Vnet parSpokeToHubRouteTableName="AVD-to-hub" parHubVirtualNetworkId="/subscriptions/$(CONNECTIVITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Hub-Vnet-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-hub-canadacentral" \
-        --location $(Location) \
-        --management-group-id $(MGMT_PREFIX) \
-        --name create_spoke_network-$(RunNumber)

@@ -61,10 +61,10 @@ param parSpokeToHubRouteTableName string = 'rtb-spoke-to-hub'
 param parHubVirtualNetworkId string
 
 @sys.description('Switch to enable/disable forwarded Traffic from outside spoke network. Default: false')
-param parAllowSpokeForwardedTraffic bool = false
+param parAllowSpokeForwardedTraffic bool = true
 
 @sys.description('Switch to enable/disable VPN Gateway for the hub network peering. Default: false')
-param parAllowHubVpnGatewayTransit bool = false
+param parAllowHubVpnGatewayTransit bool = true
 
 // **Variables**
 // Customer Usage Attribution Id
