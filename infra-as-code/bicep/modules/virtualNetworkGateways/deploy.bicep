@@ -76,7 +76,7 @@ param enableBgp bool = false
 param asn int = 65815
 
 @description('Optional. The IP address range from which VPN clients will receive an IP address when connected. Range specified must not overlap with on-premise network.')
-param vpnClientAddressPoolPrefix string = ''
+param vpnClientAddressPoolPrefix string = '10.15.1.0/24'
 
 @description('Optional. Configures this gateway to accept traffic from remote Virtual WAN networks.')
 param allowVirtualWanTraffic bool = false
