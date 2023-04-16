@@ -9,7 +9,7 @@ variables:
   RunNumber: $(Build.BuildNumber)
 
 jobs:
-- job: Deploy Management Groups Policies and Roles
+- job: MGMT
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Management Groups
@@ -54,7 +54,7 @@ jobs:
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_rbac_roles-$(RunNumber)
-- job: Deploy Resource Groups
+- job: RG
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Logging Resource Group
@@ -130,7 +130,7 @@ jobs:
         --parameters parResourceGroupName="$(MGMT_PREFIX)-AVD-RG" parLocation=$(Location) \
         --location $(Location) \
         --name create_avd_rg-$(RunNumber)
-- job: Deploy Logging
+- job: LOG
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Logging
@@ -192,7 +192,7 @@ jobs:
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_spoke_network-$(RunNumber)
-- job: Deploy Identity RG
+- job: IDENTITY
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Domain Controller
@@ -238,7 +238,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/vnetPeering/vnetPeering.bicep \
         --parameters parDestinationVirtualNetworkId="/subscriptions/$(IDENTITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Identity-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-Identity-Vnet" parSourceVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" \
         --name peer_hub_vnet_to_identity-$(RunNumber)
-- job: Deploy Storage Account
+- job: SA
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Create Storage Account
@@ -254,7 +254,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/storageAccounts/deploy.bicep \
         --parameters skuName="Premium_LRS" largeFileSharesState="Enabled" \
         --name create_sa-$(RunNumber)
-- job: Deploy role and policy assignments and place subscriptions
+- job: ASSIGN_SUB
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Role Assignment
