@@ -20,7 +20,7 @@ param parAllowForwardedTraffic bool = true
 param parAllowGatewayTransit bool = true
 
 @sys.description('Switch to enable/disable remote gateway for the Network Peer.')
-param parUseRemoteGateways bool = false
+param parUseRemoteGateways bool = true
 
 @sys.description('Set Parameter to true to Opt-out of deployment telemetry.')
 param parTelemetryOptOut bool = false
