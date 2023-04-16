@@ -103,7 +103,22 @@ param natRules array = []
 param enableBgpRouteTranslationForNat bool = false
 
 @description('Optional. Client root certificate data used to authenticate VPN clients. Cannot be configured if vpnClientAadConfiguration is provided.')
-param clientRootCertData string = ''
+param clientRootCertData string = '''MIIC5zCCAc+gAwIBAgIQP+2n6/JxcapNwu1lCQ/0CzANBgkqhkiG9w0BAQsFADAW
+MRQwEgYDVQQDDAtQMlNSb290Q2VydDAeFw0yMzA0MTQxOTAyNDBaFw0yNDA0MTQx
+OTIyNDBaMBYxFDASBgNVBAMMC1AyU1Jvb3RDZXJ0MIIBIjANBgkqhkiG9w0BAQEF
+AAOCAQ8AMIIBCgKCAQEAmF3W3E/9eCjwEL5oisJHPKMugV93JZJKk0U6jdH0G1P4
+6HWQlzOeivSZoKDb/5ASJK2iiPxvBzhfFCM2TtVmEPXDp+xoiXRVpkjq73oXIWeA
+q1QU0HyTWMgVI4GmvgZT9jcVCJYUSCUglam4G5+Rp3fqiq9ZyTNfWYqjPhRJBdG/
+YfJ/VQ03tUXlTie4GPqy5w8voOcWJIC/qLR9UM8PRer6GoVpaVKe3SnMAo6EkCA9
++1thqGSls37D7cwLpMhGprTIPAIbX1m7OYsRE40yvFikCMpJuUwjdhH3dEWYnsRE
+SZAXqGooh2dBzg83FpovtZDxj2kdRU5wtX6NDoKBMQIDAQABozEwLzAOBgNVHQ8B
+Af8EBAMCAgQwHQYDVR0OBBYEFCfQZTdsd3Rtg2dnm9IHaRaRqIqsMA0GCSqGSIb3
+DQEBCwUAA4IBAQBiVjrmAyWwN4XJLUMnKCHCKCaoqB6w809YmcLZCeJWlZEeUN8w
+E2r/rmb55RxZUv4gxASfc93sKZ+b/M2pQzswMgR0mEgESDvQIv/XFdUX9b717NkX
+JMeZyynGH14YZXEiiZLVbGtAwCh4uWtL0eTE34d+u6upL0ZbGrM8HOTMn+XKVNmX
+p5EIq7feOAEY0DxI2PsfhNA3B7gkex8hT/7/9+p+bEq5tBWeTX8Cisr8LVjhk/ET
+ECAr4Rl/qpgkihM7udBO4f1PnlFZV/AWoZV9gulhNOItRyOJ7ZxZbbwbulbDF/cV
+ywlHVE3hLerVL+EdtP0c0SkHpQZLmyqXkj+u'''
 
 @description('Optional. Thumbprint of the revoked certificate. This would revoke VPN client certificates matching this thumbprint from connecting to the VNet.')
 param clientRevokedCertThumbprint string = ''
