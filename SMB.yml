@@ -55,6 +55,7 @@ jobs:
         --management-group-id $(MGMT_PREFIX) \
         --name create_rbac_roles-$(RunNumber)
 - job: RG
+  dependsOn: "MGMT"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Logging Resource Group
@@ -131,6 +132,7 @@ jobs:
         --location $(Location) \
         --name create_avd_rg-$(RunNumber)
 - job: LOG
+  dependsOn: "RG"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Logging
@@ -147,6 +149,7 @@ jobs:
         --parameters parLogAnalyticsWorkspaceName="$(MGMT_PREFIX)-log-analytics" \
         --name create_logging-$(RunNumber)
 - job: HUB
+  dependsOn: "RG"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Hub Network
@@ -192,7 +195,8 @@ jobs:
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_spoke_network-$(RunNumber)
-- job: IDENTITY
+- job: IDENTITY_DC
+  dependsOn: "RG"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Domain Controller
@@ -208,7 +212,9 @@ jobs:
         --template-file infra-as-code/bicep/modules/active-directory-new-domain/main.bicep \
         --parameters location=$(Location) adminUsername="microage" adminPassword=$(DC_PASSWORD) domainName=$(DOMAIN_NAME) vmSize="Standard_D2as_V5" virtualMachineName=$(MGMT_PREFIX)-DC virtualNetworkName=$(MGMT_PREFIX)-Identity-Vnet virtualNetworkAddressRange="10.5.0.0/16" privateIPAddress="10.5.1.4" subnetName="default" subnetRange="10.5.1.0/24" networkInterfaceName="$(MGMT_PREFIX)-DC-NIC" \
         --name create_dc-$(RunNumber)
-
+- job: IDENTITY_NET
+  dependsOn: "HUB"
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Peer Identity Vnet to Hub
     name: peer_identity_vnet_to_hub
@@ -239,6 +245,7 @@ jobs:
         --parameters parDestinationVirtualNetworkId="/subscriptions/$(IDENTITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Identity-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-Identity-Vnet" parSourceVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" \
         --name peer_hub_vnet_to_identity-$(RunNumber)
 - job: SA
+  dependsOn: "RG"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Create Storage Account
@@ -255,6 +262,7 @@ jobs:
         --parameters skuName="Premium_LRS" largeFileSharesState="Enabled" \
         --name create_sa-$(RunNumber)
 - job: ASSIGN_SUB
+  dependsOn: "MGMT"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Role Assignment
