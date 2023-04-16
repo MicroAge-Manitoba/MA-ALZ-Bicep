@@ -146,7 +146,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/logging/logging.bicep \
         --parameters parLogAnalyticsWorkspaceName="$(MGMT_PREFIX)-log-analytics" \
         --name create_logging-$(RunNumber)
-- job: Deploy Hub and AVD Spoke
+- job: HUB
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Hub Network
