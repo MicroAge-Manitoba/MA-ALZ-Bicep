@@ -24,7 +24,9 @@ jobs:
         --parameters parTopLevelManagementGroupPrefix="$(MGMT_PREFIX)" parTopLevelManagementGroupDisplayName="$(MGMT_GROUP_NAME)" \
         --location $(Location) \
         --name create_mgs-$(RunNumber)
-
+- job: C_POLICY
+  dependsOn: "MGMT"
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Custom Policy Definitions
     name: create_policy_defs
@@ -39,7 +41,9 @@ jobs:
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_policy_defs-$(RunNumber)
-
+- job: C_ROLE
+  dependsOn: "MGMT"
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Custom Role Definitions
     name: create_rbac_roles
@@ -54,8 +58,7 @@ jobs:
         --location $(Location) \
         --management-group-id $(MGMT_PREFIX) \
         --name create_rbac_roles-$(RunNumber)
-- job: RG
-  dependsOn: "MGMT"
+- job: RG_LOG
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Logging Resource Group
@@ -71,7 +74,8 @@ jobs:
         --parameters parResourceGroupName=$(LOGGING_RG) parLocation=$(Location) \
         --location $(Location) \
         --name create_logging_rg-$(RunNumber)
-
+- job: RG_HUB
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Hub Network Resource Group
     name: create_hub_network_rg
@@ -86,7 +90,8 @@ jobs:
         --parameters parResourceGroupName="$(MGMT_PREFIX)-Hub-Vnet-RG" parLocation=$(Location) \
         --location $(Location) \
         --name create_hub_network_rg-$(RunNumber)
-
+- job: RG_ID
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Identity Resource Group
     name: create_identity_rg
@@ -101,7 +106,8 @@ jobs:
         --parameters parResourceGroupName="$(MGMT_PREFIX)-Identity-RG" parLocation=$(Location) \
         --location $(Location) \
         --name create_identity_rg-$(RunNumber)
-
+- job: RG_AF
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Azure Files Resource Group
     name: create_af_rg
@@ -116,7 +122,8 @@ jobs:
         --parameters parResourceGroupName="$(MGMT_PREFIX)-AF-RG" parLocation=$(Location) \
         --location $(Location) \
         --name create_af_rg-$(RunNumber)
-
+- job: RG_AVD
+  steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy AVD Resource Group
     name: create_avd_rg
@@ -132,7 +139,7 @@ jobs:
         --location $(Location) \
         --name create_avd_rg-$(RunNumber)
 - job: LOG
-  dependsOn: "RG"
+  dependsOn: "RG_LOG"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Logging
@@ -149,7 +156,7 @@ jobs:
         --parameters parLogAnalyticsWorkspaceName="$(MGMT_PREFIX)-log-analytics" \
         --name create_logging-$(RunNumber)
 - job: HUB
-  dependsOn: "RG"
+  dependsOn: "RG_HUB"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Hub Network
@@ -196,7 +203,7 @@ jobs:
         --management-group-id $(MGMT_PREFIX) \
         --name create_spoke_network-$(RunNumber)
 - job: IDENTITY_DC
-  dependsOn: "RG"
+  dependsOn: "RG_ID"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Domain Controller
@@ -245,7 +252,7 @@ jobs:
         --parameters parDestinationVirtualNetworkId="/subscriptions/$(IDENTITY_SUB_ID)/resourceGroups/$(MGMT_PREFIX)-Identity-RG/providers/Microsoft.Network/virtualNetworks/$(MGMT_PREFIX)-Identity-Vnet" parSourceVirtualNetworkName="$(MGMT_PREFIX)-hub-canadacentral" parDestinationVirtualNetworkName="$(MGMT_PREFIX)-Identity-Vnet" \
         --name peer_hub_vnet_to_identity-$(RunNumber)
 - job: SA
-  dependsOn: "RG"
+  dependsOn: "RG_AF"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Create Storage Account
@@ -262,7 +269,7 @@ jobs:
         --parameters skuName="Premium_LRS" largeFileSharesState="Enabled" \
         --name create_sa-$(RunNumber)
 - job: ASSIGN_SUB
-  dependsOn: "IDENTITY_NET"
+  dependsOn: "SA"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Role Assignment
