@@ -397,6 +397,9 @@ resource virtualNetworkGateway 'Microsoft.Network/virtualNetworkGateways@2022-07
     allowVirtualWanTraffic: allowVirtualWanTraffic
     enableBgp: isBgpValid
     bgpSettings: isBgpValid ? bgpSettings : null
+    customRoutes: [
+      '10.5.1.0/24'
+    ]
     disableIPSecReplayProtection: disableIPSecReplayProtection
     enableDnsForwarding: gatewayType == 'ExpressRoute' ? enableDnsForwarding : null
     enablePrivateIpAddress: enablePrivateIpAddress
