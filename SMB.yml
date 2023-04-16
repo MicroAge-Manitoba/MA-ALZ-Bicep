@@ -262,7 +262,7 @@ jobs:
         --parameters skuName="Premium_LRS" largeFileSharesState="Enabled" \
         --name create_sa-$(RunNumber)
 - job: ASSIGN_SUB
-  dependsOn: "MGMT"
+  dependsOn: "IDENTITY_NET"
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Role Assignment
