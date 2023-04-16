@@ -9,7 +9,7 @@ variables:
   RunNumber: $(Build.BuildNumber)
 
 jobs:
-- job: Deploy Management Groups, Policies, and Roles
+- job: Deploy Management Groups Policies and Roles
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Management Groups
@@ -254,7 +254,7 @@ jobs:
         --template-file infra-as-code/bicep/modules/storageAccounts/deploy.bicep \
         --parameters skuName="Premium_LRS" largeFileSharesState="Enabled" \
         --name create_sa-$(RunNumber)
-- job: Deploy role and policy assignments, and palce subscriptions
+- job: Deploy role and policy assignments and place subscriptions
   steps:
   - task: AzureCLI@2
     displayName: Az CLI Deploy Role Assignment
